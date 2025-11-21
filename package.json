@@ -1,0 +1,44 @@
+{
+  "name": "sheetfreak",
+  "version": "0.1.0",
+  "description": "CLI tool for programmatic Google Sheets control, optimized for AI agents",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "sheetfreak": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/cli.ts",
+    "start": "node dist/cli.js",
+    "test": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "google-sheets",
+    "cli",
+    "automation",
+    "ai-agents"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0",
+    "@playwright/mcp": "^0.0.47",
+    "chalk": "^5.0.0",
+    "cli-table3": "^0.6.0",
+    "commander": "^12.0.0",
+    "dotenv": "^16.0.0",
+    "google-auth-library": "^9.0.0",
+    "googleapis": "^140.0.0",
+    "ora": "^8.0.0",
+    "playwright": "^1.56.1",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  }
+}

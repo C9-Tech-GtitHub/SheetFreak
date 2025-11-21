@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Credentials (IMPORTANT: Never commit these!)
+credentials.json
+service-account.json
+*.credentials.json
+
+# SheetFreak config
+.sheetfreak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+test-*/
+backup/
+examples/
+
+# Development artifacts
+*.json.backup
+*.sh.backup
+
+# Playwright
+.playwright-mcp/
