@@ -1,5 +1,8 @@
 # SheetFreak
 
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/C9-Tech-GtitHub/SheetFreak)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 A command-line tool for programmatic Google Sheets control, optimized for AI agents and automation workflows.
 
 ## Features
