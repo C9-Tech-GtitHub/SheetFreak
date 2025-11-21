@@ -340,6 +340,121 @@ sheetfreak auth status
 
 ---
 
+### 8. Apps Script Automation
+
+**Commands available:**
+
+#### Script Management
+```bash
+# List scripts attached to a spreadsheet
+sheetfreak script list <spreadsheet-id>
+
+# Create a new Apps Script project
+sheetfreak script create <spreadsheet-id> <title>
+
+# Deploy script code to spreadsheet
+sheetfreak script deploy <spreadsheet-id> <script-file> [--create-if-missing]
+
+# Read script source code
+sheetfreak script read <script-id> [file-name] [--all] [--format json|code]
+
+# Write/update script file
+sheetfreak script write <script-id> <file-name> <source-file> [--type SERVER_JS|HTML]
+
+# List functions in a script
+sheetfreak script functions <script-id>
+
+# Execute a function
+sheetfreak script run <script-id> <function-name> [args...] [--dev-mode]
+```
+
+#### Version & Deployment Management
+```bash
+# Create a new version
+sheetfreak script version-create <script-id> <description>
+
+# List all versions
+sheetfreak script versions <script-id>
+
+# List deployments
+sheetfreak script deployments <script-id>
+
+# Create deployment
+sheetfreak script deployment-create <script-id> <description> [--version N]
+```
+
+#### Template Library
+```bash
+# List available templates
+sheetfreak script template-list
+
+# Show template details and source
+sheetfreak script template-show <template-name>
+
+# Apply template to spreadsheet
+sheetfreak script template-apply <spreadsheet-id> <template-name> [--config file.json]
+```
+
+**Available Templates:**
+- `auto-refresh` - Auto-refresh data from external API on schedule
+- `custom-menu` - Add custom menu with actions (refresh, format, export)
+- `on-edit-validator` - Validate and format data when cells are edited
+
+#### Clasp Integration (Advanced)
+```bash
+# Initialize clasp for local development
+sheetfreak script clasp-init <spreadsheet-id>
+
+# Check clasp status
+sheetfreak script clasp-status
+
+# Quick clasp commands
+sheetfreak script clasp-pull    # Download from Google
+sheetfreak script clasp-push    # Upload to Google
+sheetfreak script clasp-open    # Open in browser
+sheetfreak script clasp-logs    # View execution logs
+
+# Pass-through to clasp CLI
+sheetfreak script clasp <args...>
+```
+
+**When to use:**
+- Automate repetitive tasks (hourly data refresh, backups)
+- Add custom menus and UI elements
+- Create custom spreadsheet functions
+- Validate data on edit
+- Send notifications or trigger external systems
+- Local development with full IDE support (using clasp)
+
+**Example: Deploy auto-refresh template**
+```bash
+# Apply template with configuration
+echo '{"API_URL": "https://api.example.com/data", "TARGET_RANGE": "Data!A1"}' > config.json
+sheetfreak script template-apply abc123 auto-refresh --config config.json
+
+# Script will be deployed and show recommended trigger setup
+```
+
+**Example: Local development workflow**
+```bash
+# Initialize clasp
+sheetfreak script clasp-init abc123
+
+# Download existing code
+sheetfreak script clasp-pull
+
+# Edit files locally in your IDE
+# ... edit Code.gs ...
+
+# Upload changes
+sheetfreak script clasp-push
+
+# View logs
+sheetfreak script clasp-logs
+```
+
+---
+
 ## Working with A1 Notation
 
 Google Sheets uses **A1 notation** to reference cells and ranges:
@@ -753,16 +868,19 @@ sheetfreak <command>
 - ✅ Tab management (add, delete, rename sheets)
 - ✅ Sheet management (create, copy, share, list)
 - ✅ Service account authentication
+- ✅ Google Apps Script integration (custom functions, triggers)
+- ✅ Apps Script template library (auto-refresh, custom menus, validators)
+- ✅ Clasp integration for local development
 
 **Future enhancements:**
 - [ ] Charts and visualizations API
 - [ ] Conditional formatting support
 - [ ] Data validation rules
 - [ ] Named ranges support
-- [ ] Template system for common patterns
 - [ ] Import/export utilities (XLSX, PDF)
+- [ ] Additional Apps Script templates (email notifications, data backup)
+- [ ] Trigger management API (create/delete time-based and event-based triggers)
 - [ ] MCP (Model Context Protocol) server integration
-- [ ] Google Apps Script integration (custom functions, triggers)
 
 ---
 
@@ -817,6 +935,21 @@ sheetfreak visual capture-range <id> <range> <output>
 sheetfreak visual inspect <id>
 sheetfreak visual compare <id> <baseline.png>
 
+# APPS SCRIPT AUTOMATION
+sheetfreak script list <id>
+sheetfreak script create <id> <title>
+sheetfreak script deploy <id> <script-file> [--create-if-missing]
+sheetfreak script read <script-id> [file-name] [--all]
+sheetfreak script write <script-id> <file-name> <source-file>
+sheetfreak script run <script-id> <function-name> [args...]
+sheetfreak script functions <script-id>
+sheetfreak script template-list
+sheetfreak script template-show <template-name>
+sheetfreak script template-apply <id> <template-name> [--config file.json]
+sheetfreak script clasp-init <id>
+sheetfreak script clasp-pull
+sheetfreak script clasp-push
+
 # CONTEXT
 sheetfreak context set <id>
 sheetfreak context get
@@ -828,9 +961,11 @@ sheetfreak context get
 
 - **Google Sheets API:** https://developers.google.com/sheets/api
 - **Google Drive API:** https://developers.google.com/drive/api
+- **Google Apps Script:** https://developers.google.com/apps-script
 - **A1 Notation Guide:** https://developers.google.com/sheets/api/guides/concepts#cell
 - **Playwright Docs:** https://playwright.dev
 - **Commander.js:** https://github.com/tj/commander.js
+- **Clasp (Apps Script CLI):** https://github.com/google/clasp
 - **Zod Validation:** https://zod.dev
 
 ---

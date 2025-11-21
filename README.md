@@ -13,6 +13,9 @@ A command-line tool for programmatic Google Sheets control, optimized for AI age
 - **Batch operations**: Update multiple ranges efficiently
 - **Cell formatting**: Colors, fonts, borders, alignment, and styling
 - **Visual tools**: Screenshot capabilities for design verification
+- **Apps Script automation**: Deploy scripts, create triggers, and automate workflows
+- **Template library**: Ready-to-use templates for common automation tasks
+- **Clasp integration**: Full local development support with Google's official CLI
 
 ## Quick Start
 
@@ -230,6 +233,65 @@ Named colors: `red`, `green`, `blue`, `yellow`, `orange`, `purple`, `pink`, `whi
 
 Or use hex colors: `#FF0000`, `#00FF00`, `#0000FF`, etc.
 
+### Apps Script Automation
+
+Deploy scripts and automate your spreadsheets with Google Apps Script:
+
+```bash
+# List available templates
+node dist/cli.js script template-list
+
+# View template details
+node dist/cli.js script template-show auto-refresh
+
+# Apply a template with configuration
+echo '{"API_URL": "https://api.example.com/data", "TARGET_RANGE": "Data!A1"}' > config.json
+node dist/cli.js script template-apply <spreadsheet-id> auto-refresh --config config.json
+
+# Deploy custom script
+node dist/cli.js script deploy <spreadsheet-id> my-script.js --create-if-missing
+
+# List functions in a script
+node dist/cli.js script functions <script-id>
+
+# Run a function
+node dist/cli.js script run <script-id> refreshData
+```
+
+**Available Templates:**
+- `auto-refresh` - Automatically refresh data from external API
+- `custom-menu` - Add custom menu with actions (refresh, format, export)
+- `on-edit-validator` - Validate and format data when cells are edited
+
+### Local Development with Clasp
+
+For advanced users who want full IDE support:
+
+```bash
+# Initialize clasp for a spreadsheet
+node dist/cli.js script clasp-init <spreadsheet-id>
+
+# Pull latest code from Google
+node dist/cli.js script clasp-pull
+
+# Edit files locally in your favorite IDE
+# ... edit Code.gs ...
+
+# Push changes back to Google
+node dist/cli.js script clasp-push
+
+# Open script in browser
+node dist/cli.js script clasp-open
+
+# View execution logs
+node dist/cli.js script clasp-logs
+```
+
+**Prerequisites for clasp:**
+```bash
+npm install -g @google/clasp
+```
+
 ## Command Reference
 
 ### Authentication
@@ -269,6 +331,23 @@ Or use hex colors: `#FF0000`, `#00FF00`, `#0000FF`, etc.
 - `visual compare <id> <baseline>` - Compare with baseline image
 - `visual inspect <id>` - Open in browser for inspection
 - `visual capture-range <id> <range> <output>` - Screenshot specific range
+
+### Apps Script
+- `script list <id>` - List scripts attached to spreadsheet
+- `script create <id> <title>` - Create new Apps Script project
+- `script deploy <id> <script-file>` - Deploy script code
+- `script read <script-id> [file-name]` - Read script source
+- `script write <script-id> <file-name> <source-file>` - Write script file
+- `script run <script-id> <function-name> [args...]` - Execute function
+- `script functions <script-id>` - List all functions
+- `script template-list` - List available templates
+- `script template-show <template-name>` - Show template details
+- `script template-apply <id> <template-name>` - Apply template
+- `script clasp-init <id>` - Initialize clasp for local development
+- `script clasp-pull` - Pull code from Google
+- `script clasp-push` - Push code to Google
+- `script clasp-open` - Open script in browser
+- `script clasp-logs` - View execution logs
 
 ### Context
 - `context set <id>` - Set working spreadsheet
@@ -342,9 +421,13 @@ npm run dev -- auth status
 - [x] Cell formatting and styling
 - [x] Visual screenshot tools
 - [x] Borders and column/row resizing
+- [x] Google Apps Script integration
+- [x] Apps Script template library
+- [x] Clasp integration for local development
 - [ ] Charts and visualizations
 - [ ] Conditional formatting
-- [ ] Template system
+- [ ] Trigger management API
+- [ ] Additional Apps Script templates
 - [ ] Import/export utilities (CSV, XLSX, PDF)
 - [ ] Automated testing framework
 

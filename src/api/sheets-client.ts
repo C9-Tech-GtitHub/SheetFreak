@@ -13,9 +13,17 @@ import {
 
 export class SheetsClient {
   private sheets: sheets_v4.Sheets;
+  private initialized: boolean = false;
 
   constructor(private auth: ServiceAccountAuth) {
     this.sheets = auth.getSheetsAPI();
+  }
+
+  private async ensureAuthorized(): Promise<void> {
+    if (!this.initialized) {
+      await this.auth.authorize();
+      this.initialized = true;
+    }
   }
 
   // Read data from a range
@@ -23,6 +31,7 @@ export class SheetsClient {
     spreadsheetId: string,
     range: string,
   ): Promise<any[][] | undefined> {
+    await this.ensureAuthorized();
     try {
       const response = await this.sheets.spreadsheets.values.get({
         spreadsheetId,
@@ -40,6 +49,7 @@ export class SheetsClient {
     range: string,
     values: any[][],
   ): Promise<void> {
+    await this.ensureAuthorized();
     try {
       await this.sheets.spreadsheets.values.update({
         spreadsheetId,
@@ -57,6 +67,7 @@ export class SheetsClient {
     spreadsheetId: string,
     updates: BatchUpdate[],
   ): Promise<void> {
+    await this.ensureAuthorized();
     try {
       const data = updates.map((u) => ({
         range: u.range,
@@ -77,6 +88,7 @@ export class SheetsClient {
 
   // Clear a range
   async clear(spreadsheetId: string, range: string): Promise<void> {
+    await this.ensureAuthorized();
     try {
       await this.sheets.spreadsheets.values.clear({
         spreadsheetId,
@@ -93,6 +105,7 @@ export class SheetsClient {
     range: string,
     values: any[][],
   ): Promise<void> {
+    await this.ensureAuthorized();
     try {
       await this.sheets.spreadsheets.values.append({
         spreadsheetId,
@@ -109,6 +122,7 @@ export class SheetsClient {
   async getSpreadsheet(
     spreadsheetId: string,
   ): Promise<sheets_v4.Schema$Spreadsheet> {
+    await this.ensureAuthorized();
     try {
       const response = await this.sheets.spreadsheets.get({
         spreadsheetId,
@@ -121,6 +135,7 @@ export class SheetsClient {
 
   // List all sheets in a spreadsheet
   async listSheets(spreadsheetId: string): Promise<SheetInfo[]> {
+    await this.ensureAuthorized();
     try {
       const spreadsheet = await this.getSpreadsheet(spreadsheetId);
 
@@ -140,6 +155,7 @@ export class SheetsClient {
 
   // Add a new sheet/tab
   async addSheet(spreadsheetId: string, title: string): Promise<number> {
+    await this.ensureAuthorized();
     try {
       const response = await this.sheets.spreadsheets.batchUpdate({
         spreadsheetId,
@@ -169,6 +185,7 @@ export class SheetsClient {
 
   // Delete a sheet/tab by title
   async deleteSheet(spreadsheetId: string, title: string): Promise<void> {
+    await this.ensureAuthorized();
     try {
       const sheets = await this.listSheets(spreadsheetId);
       const sheet = sheets.find((s) => s.title === title);
@@ -200,6 +217,7 @@ export class SheetsClient {
     oldTitle: string,
     newTitle: string,
   ): Promise<void> {
+    await this.ensureAuthorized();
     try {
       const sheets = await this.listSheets(spreadsheetId);
       const sheet = sheets.find((s) => s.title === oldTitle);
@@ -231,6 +249,7 @@ export class SheetsClient {
 
   // Execute batch update requests (for complex operations)
   async batchUpdate(spreadsheetId: string, requests: any[]): Promise<any> {
+    await this.ensureAuthorized();
     try {
       const response = await this.sheets.spreadsheets.batchUpdate({
         spreadsheetId,
@@ -316,6 +335,7 @@ export class SheetsClient {
     range: string,
     format: CellFormat,
   ): Promise<void> {
+    await this.ensureAuthorized();
     try {
       const gridRange = await this.rangeToGridRange(spreadsheetId, range);
 
@@ -408,6 +428,7 @@ export class SheetsClient {
     range: string,
     borders: Borders,
   ): Promise<void> {
+    await this.ensureAuthorized();
     try {
       const gridRange = await this.rangeToGridRange(spreadsheetId, range);
 
@@ -471,6 +492,7 @@ export class SheetsClient {
     endColumn: number,
     pixelSize: number,
   ): Promise<void> {
+    await this.ensureAuthorized();
     try {
       const sheets = await this.listSheets(spreadsheetId);
       const sheet = sheets.find((s) => s.title === sheetTitle);
@@ -507,6 +529,7 @@ export class SheetsClient {
     endRow: number,
     pixelSize: number,
   ): Promise<void> {
+    await this.ensureAuthorized();
     try {
       const sheets = await this.listSheets(spreadsheetId);
       const sheet = sheets.find((s) => s.title === sheetTitle);
@@ -542,6 +565,7 @@ export class SheetsClient {
     startColumn: number,
     endColumn: number,
   ): Promise<void> {
+    await this.ensureAuthorized();
     try {
       const sheets = await this.listSheets(spreadsheetId);
       const sheet = sheets.find((s) => s.title === sheetTitle);

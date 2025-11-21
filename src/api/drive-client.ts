@@ -1,31 +1,40 @@
 // Google Drive API client wrapper
-import { drive_v3 } from 'googleapis';
-import { ServiceAccountAuth } from '../auth/service-account.js';
-import { handleGoogleAPIError } from '../utils/errors.js';
-import { SpreadsheetInfo } from '../types/index.js';
+import { drive_v3 } from "googleapis";
+import { ServiceAccountAuth } from "../auth/service-account.js";
+import { handleGoogleAPIError } from "../utils/errors.js";
+import { SpreadsheetInfo } from "../types/index.js";
 
 export class DriveClient {
   private drive: drive_v3.Drive;
+  private initialized: boolean = false;
 
   constructor(private auth: ServiceAccountAuth) {
     this.drive = auth.getDriveAPI();
   }
 
+  private async ensureAuthorized(): Promise<void> {
+    if (!this.initialized) {
+      await this.auth.authorize();
+      this.initialized = true;
+    }
+  }
+
   // Create a new spreadsheet
   async createSpreadsheet(name: string): Promise<SpreadsheetInfo> {
+    await this.ensureAuthorized();
     try {
       const response = await this.drive.files.create({
         requestBody: {
           name,
-          mimeType: 'application/vnd.google-apps.spreadsheet'
+          mimeType: "application/vnd.google-apps.spreadsheet",
         },
-        fields: 'id, name, webViewLink'
+        fields: "id, name, webViewLink",
       });
 
       return {
         spreadsheetId: response.data.id!,
-        spreadsheetUrl: response.data.webViewLink || '',
-        title: response.data.name || name
+        spreadsheetUrl: response.data.webViewLink || "",
+        title: response.data.name || name,
       };
     } catch (error: any) {
       handleGoogleAPIError(error);
@@ -34,18 +43,19 @@ export class DriveClient {
 
   // List all spreadsheets accessible to service account
   async listSpreadsheets(pageSize: number = 100): Promise<SpreadsheetInfo[]> {
+    await this.ensureAuthorized();
     try {
       const response = await this.drive.files.list({
         q: "mimeType='application/vnd.google-apps.spreadsheet'",
         pageSize,
-        fields: 'files(id, name, webViewLink, modifiedTime)',
-        orderBy: 'modifiedTime desc'
+        fields: "files(id, name, webViewLink, modifiedTime)",
+        orderBy: "modifiedTime desc",
       });
 
-      return (response.data.files || []).map(file => ({
+      return (response.data.files || []).map((file) => ({
         spreadsheetId: file.id!,
-        spreadsheetUrl: file.webViewLink || '',
-        title: file.name || 'Untitled'
+        spreadsheetUrl: file.webViewLink || "",
+        title: file.name || "Untitled",
       }));
     } catch (error: any) {
       handleGoogleAPIError(error);
@@ -54,16 +64,17 @@ export class DriveClient {
 
   // Get spreadsheet info
   async getSpreadsheetInfo(spreadsheetId: string): Promise<SpreadsheetInfo> {
+    await this.ensureAuthorized();
     try {
       const response = await this.drive.files.get({
         fileId: spreadsheetId,
-        fields: 'id, name, webViewLink'
+        fields: "id, name, webViewLink",
       });
 
       return {
         spreadsheetId: response.data.id!,
-        spreadsheetUrl: response.data.webViewLink || '',
-        title: response.data.name || 'Untitled'
+        spreadsheetUrl: response.data.webViewLink || "",
+        title: response.data.name || "Untitled",
       };
     } catch (error: any) {
       handleGoogleAPIError(error);
@@ -71,20 +82,24 @@ export class DriveClient {
   }
 
   // Copy a spreadsheet (for templates)
-  async copySpreadsheet(spreadsheetId: string, newName: string): Promise<SpreadsheetInfo> {
+  async copySpreadsheet(
+    spreadsheetId: string,
+    newName: string,
+  ): Promise<SpreadsheetInfo> {
+    await this.ensureAuthorized();
     try {
       const response = await this.drive.files.copy({
         fileId: spreadsheetId,
         requestBody: {
-          name: newName
+          name: newName,
         },
-        fields: 'id, name, webViewLink'
+        fields: "id, name, webViewLink",
       });
 
       return {
         spreadsheetId: response.data.id!,
-        spreadsheetUrl: response.data.webViewLink || '',
-        title: response.data.name || newName
+        spreadsheetUrl: response.data.webViewLink || "",
+        title: response.data.name || newName,
       };
     } catch (error: any) {
       handleGoogleAPIError(error);
@@ -95,17 +110,18 @@ export class DriveClient {
   async shareSpreadsheet(
     spreadsheetId: string,
     email: string,
-    role: 'reader' | 'writer' | 'owner' = 'writer'
+    role: "reader" | "writer" | "owner" = "writer",
   ): Promise<void> {
+    await this.ensureAuthorized();
     try {
       await this.drive.permissions.create({
         fileId: spreadsheetId,
         requestBody: {
-          type: 'user',
+          type: "user",
           role,
-          emailAddress: email
+          emailAddress: email,
         },
-        sendNotificationEmail: true
+        sendNotificationEmail: true,
       });
     } catch (error: any) {
       handleGoogleAPIError(error);
@@ -114,9 +130,10 @@ export class DriveClient {
 
   // Delete a spreadsheet
   async deleteSpreadsheet(spreadsheetId: string): Promise<void> {
+    await this.ensureAuthorized();
     try {
       await this.drive.files.delete({
-        fileId: spreadsheetId
+        fileId: spreadsheetId,
       });
     } catch (error: any) {
       handleGoogleAPIError(error);
@@ -126,15 +143,16 @@ export class DriveClient {
   // Export spreadsheet in different formats
   async exportSpreadsheet(
     spreadsheetId: string,
-    mimeType: string
+    mimeType: string,
   ): Promise<Buffer> {
+    await this.ensureAuthorized();
     try {
       const response = await this.drive.files.export(
         {
           fileId: spreadsheetId,
-          mimeType
+          mimeType,
         },
-        { responseType: 'arraybuffer' }
+        { responseType: "arraybuffer" },
       );
 
       return Buffer.from(response.data as ArrayBuffer);

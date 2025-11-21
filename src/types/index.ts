@@ -100,3 +100,46 @@ export interface CommandResult {
   data?: any;
   error?: SheetFreakError;
 }
+
+// Apps Script types
+export interface ScriptProjectInfo {
+  scriptId: string;
+  title: string;
+  createTime?: string;
+  updateTime?: string;
+  parentId?: string;
+}
+
+export interface ScriptFile {
+  name: string;
+  type: "SERVER_JS" | "HTML" | "JSON";
+  source: string;
+  functionSet?: {
+    values?: Array<{
+      name: string;
+    }>;
+  };
+}
+
+export interface ScriptDeployment {
+  deploymentId: string;
+  deploymentConfig?: any;
+  updateTime?: string;
+}
+
+export interface ScriptExecutionResult {
+  response?: any;
+  done: boolean;
+}
+
+export interface ScriptProperty {
+  key: string;
+  value: string;
+}
+
+export interface TriggerInfo {
+  triggerId: string;
+  triggerSourceId?: string;
+  eventType: "ON_OPEN" | "ON_EDIT" | "ON_CHANGE" | "ON_FORM_SUBMIT" | "CLOCK";
+  handlerFunction: string;
+}

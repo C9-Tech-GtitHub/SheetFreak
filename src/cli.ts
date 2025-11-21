@@ -34,6 +34,33 @@ import {
   inspectSheet,
   captureRange,
 } from "./commands/visual.js";
+import {
+  listScripts,
+  createScript,
+  deployScript,
+  readScript,
+  writeScriptFile,
+  runScriptFunction,
+  listFunctions,
+  createScriptVersion,
+  listVersions,
+  listDeployments,
+  createDeployment,
+} from "./commands/script.js";
+import {
+  listTemplateLibrary,
+  showTemplate,
+  applyTemplate,
+} from "./commands/script-templates.js";
+import {
+  claspInit,
+  claspPassthrough,
+  claspPull,
+  claspPush,
+  claspOpen,
+  claspLogs,
+  claspStatus,
+} from "./commands/clasp-integration.js";
 import chalk from "chalk";
 
 const program = new Command();
@@ -349,10 +376,6 @@ visual
   .option("--quality <number>", "JPEG quality (1-100)", "90")
   .option("--hide <selectors>", "CSS selectors to hide (comma-separated)")
   .action(async (spreadsheetId: string, options: any) => {
-    const hiddenElements = options.hide
-      ? options.hide.split(",").map((s: string) => s.trim())
-      : [];
-
     await takeScreenshot(spreadsheetId, {
       output: options.output,
       fullPage: options.fullPage,
@@ -361,7 +384,6 @@ visual
       range: options.range,
       format: options.format,
       quality: parseInt(options.quality),
-      hiddenElements,
     });
   });
 
@@ -399,6 +421,211 @@ visual
   .description("Capture a specific range as an image")
   .action(async (spreadsheetId: string, range: string, output: string) => {
     await captureRange(spreadsheetId, range, output);
+  });
+
+// Apps Script commands
+const script = program
+  .command("script")
+  .description("Manage Google Apps Script projects and automation");
+
+script
+  .command("list <spreadsheet-id>")
+  .description("List scripts attached to a spreadsheet")
+  .option("--format <format>", "Output format: table, json", "table")
+  .action(async (spreadsheetId: string, options: any) => {
+    await listScripts(spreadsheetId, options.format);
+  });
+
+script
+  .command("create <spreadsheet-id> <title>")
+  .description("Create a new Apps Script project")
+  .option("--format <format>", "Output format: table, json", "table")
+  .action(async (spreadsheetId: string, title: string, options: any) => {
+    await createScript(spreadsheetId, title, options.format);
+  });
+
+script
+  .command("deploy <spreadsheet-id> <script-file>")
+  .description("Deploy Apps Script code to a spreadsheet")
+  .option("--title <name>", "Script project title")
+  .option("--description <text>", "Script description")
+  .option("--create-if-missing", "Create script project if none exists")
+  .action(async (spreadsheetId: string, scriptFile: string, options: any) => {
+    await deployScript(spreadsheetId, scriptFile, {
+      title: options.title,
+      description: options.description,
+      createIfMissing: options.createIfMissing,
+    });
+  });
+
+script
+  .command("read <script-id> [file-name]")
+  .description("Read Apps Script code from a project")
+  .option("--all", "Read all files in the project")
+  .option("--format <format>", "Output format: code, json", "code")
+  .action(
+    async (scriptId: string, fileName: string | undefined, options: any) => {
+      await readScript(scriptId, fileName, {
+        all: options.all,
+        format: options.format,
+      });
+    },
+  );
+
+script
+  .command("write <script-id> <file-name> <source-file>")
+  .description("Write/update a file in an Apps Script project")
+  .option("--type <type>", "File type: SERVER_JS, HTML", "SERVER_JS")
+  .action(
+    async (
+      scriptId: string,
+      fileName: string,
+      sourceFile: string,
+      options: any,
+    ) => {
+      await writeScriptFile(scriptId, fileName, sourceFile, options.type);
+    },
+  );
+
+script
+  .command("run <script-id> <function-name> [args...]")
+  .description("Execute an Apps Script function")
+  .option("--dev-mode", "Run in development mode")
+  .option("--format <format>", "Output format: json, text", "json")
+  .action(
+    async (
+      scriptId: string,
+      functionName: string,
+      args: string[],
+      options: any,
+    ) => {
+      await runScriptFunction(scriptId, functionName, args, {
+        devMode: options.devMode,
+        format: options.format,
+      });
+    },
+  );
+
+script
+  .command("functions <script-id>")
+  .description("List all functions in a script")
+  .option("--format <format>", "Output format: table, json", "table")
+  .action(async (scriptId: string, options: any) => {
+    await listFunctions(scriptId, options.format);
+  });
+
+script
+  .command("version-create <script-id> <description>")
+  .description("Create a new version of the script")
+  .action(async (scriptId: string, description: string) => {
+    await createScriptVersion(scriptId, description);
+  });
+
+script
+  .command("versions <script-id>")
+  .description("List all versions of a script")
+  .option("--format <format>", "Output format: table, json", "table")
+  .action(async (scriptId: string, options: any) => {
+    await listVersions(scriptId, options.format);
+  });
+
+script
+  .command("deployments <script-id>")
+  .description("List all deployments")
+  .option("--format <format>", "Output format: table, json", "table")
+  .action(async (scriptId: string, options: any) => {
+    await listDeployments(scriptId, options.format);
+  });
+
+script
+  .command("deployment-create <script-id> <description>")
+  .description("Create a new deployment")
+  .option(
+    "--version <number>",
+    "Version number (creates new if not specified)",
+    parseInt,
+  )
+  .action(async (scriptId: string, description: string, options: any) => {
+    await createDeployment(scriptId, description, {
+      version: options.version,
+    });
+  });
+
+script
+  .command("template-list")
+  .description("List all available Apps Script templates")
+  .option("--format <format>", "Output format: table, json", "table")
+  .action(async (options: any) => {
+    await listTemplateLibrary(options.format);
+  });
+
+script
+  .command("template-show <template-name>")
+  .description("Show template details and source code")
+  .action(async (templateName: string) => {
+    await showTemplate(templateName);
+  });
+
+script
+  .command("template-apply <spreadsheet-id> <template-name>")
+  .description("Apply a template to a spreadsheet")
+  .option("--config <file>", "Path to JSON configuration file")
+  .option("--auto-trigger", "Automatically create recommended triggers")
+  .action(async (spreadsheetId: string, templateName: string, options: any) => {
+    await applyTemplate(spreadsheetId, templateName, {
+      config: options.config,
+      autoTrigger: options.autoTrigger,
+    });
+  });
+
+script
+  .command("clasp-init <spreadsheet-id>")
+  .description("Initialize clasp for local Apps Script development")
+  .action(async (spreadsheetId: string) => {
+    await claspInit(spreadsheetId);
+  });
+
+script
+  .command("clasp-status")
+  .description("Check clasp installation and configuration status")
+  .action(async () => {
+    await claspStatus();
+  });
+
+script
+  .command("clasp-pull")
+  .description("Pull script files from Google (shortcut for clasp pull)")
+  .action(async () => {
+    await claspPull();
+  });
+
+script
+  .command("clasp-push")
+  .description("Push local changes to Google (shortcut for clasp push)")
+  .action(async () => {
+    await claspPush();
+  });
+
+script
+  .command("clasp-open")
+  .description("Open script in browser (shortcut for clasp open)")
+  .action(async () => {
+    await claspOpen();
+  });
+
+script
+  .command("clasp-logs")
+  .description("View script execution logs (shortcut for clasp logs)")
+  .action(async () => {
+    await claspLogs();
+  });
+
+script
+  .command("clasp <args...>")
+  .description("Pass-through to clasp CLI for advanced operations")
+  .allowUnknownOption()
+  .action(async (args: string[]) => {
+    await claspPassthrough(args);
   });
 
 // Global error handler

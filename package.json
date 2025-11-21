@@ -8,7 +8,8 @@
     "sheetfreak": "./dist/cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-templates",
+    "copy-templates": "mkdir -p dist/templates && cp src/templates/*.gs dist/templates/",
     "dev": "tsx watch src/cli.ts",
     "start": "node dist/cli.js",
     "test": "vitest",
@@ -40,5 +41,13 @@
     "tsx": "^4.0.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"
+  },
+  "peerDependencies": {
+    "@google/clasp": "^2.4.2"
+  },
+  "peerDependenciesMeta": {
+    "@google/clasp": {
+      "optional": true
+    }
   }
 }
